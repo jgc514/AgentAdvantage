@@ -59,17 +59,17 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
             {!collapsed && <span className="truncate">{item.label}</span>}
           </NavLink>
         ))}
-      </nav>
 
-      {/* CSV Import */}
-      <div className="border-t border-slate-700 pt-3 flex-shrink-0">
-        {!collapsed && (
-          <div className="px-6 mb-1">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</span>
-          </div>
-        )}
-        <CsvUploadButton collapsed={collapsed} />
-      </div>
+        {/* CSV Import */}
+        <div className={`mt-4 pt-3 border-t border-slate-700 ${collapsed ? '' : ''}`}>
+          {!collapsed && (
+            <div className="px-3 mb-1">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</span>
+            </div>
+          )}
+          <CsvUploadButton collapsed={collapsed} />
+        </div>
+      </nav>
 
       {/* User */}
       <div className="border-t border-slate-700 p-3 flex-shrink-0">
