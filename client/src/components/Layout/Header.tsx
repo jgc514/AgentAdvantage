@@ -1,4 +1,7 @@
+import { useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useFilters } from '../../context/FilterContext';
+import { apiService } from '../../services/api';
 
 interface HeaderProps {
   title: string;
@@ -7,8 +10,15 @@ interface HeaderProps {
   sidebarCollapsed: boolean;
 }
 
+type UploadState = 'idle' | 'uploading' | 'success' | 'error';
+
 export default function Header({ title, subtitle, onToggleSidebar, sidebarCollapsed }: HeaderProps) {
   const { setIsOpen, isOpen, resetFilters, filters } = useFilters();
+  const queryClient = useQueryClient();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploadState, setUploadState] = useState<UploadState>('idle');
+  const [uploadResult, setUploadResult] = useState<{ imported: number; skipped: number } | null>(null);
+
   const activeFiltersCount = [
     filters.status.length,
     filters.zipCodes.length,
@@ -26,6 +36,57 @@ export default function Header({ title, subtitle, onToggleSidebar, sidebarCollap
     filters.endDate ? 1 : 0,
     filters.radiusMiles ? 1 : 0,
   ].reduce((a, b) => a + b, 0);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    setUploadState('uploading');
+    setUploadResult(null);
+    try {
+      const data = await apiService.importCsv(file);
+      setUploadResult({ imported: data.imported, skipped: data.skipped });
+      setUploadState('success');
+      queryClient.invalidateQueries();
+      setTimeout(() => setUploadState('idle'), 4000);
+    } catch {
+      setUploadState('error');
+      setTimeout(() => setUploadState('idle'), 4000);
+    }
+  }
+
+  const uploadLabel =
+    uploadState === 'uploading' ? 'Uploading…'
+    : uploadState === 'success' ? `${uploadResult?.imported} imported`
+    : uploadState === 'error'   ? 'Upload failed'
+    : 'Import CSV';
+
+  const uploadIcon =
+    uploadState === 'uploading' ? (
+      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+      </svg>
+    ) : uploadState === 'success' ? (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+    ) : uploadState === 'error' ? (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+      </svg>
+    );
+
+  const uploadColorClass =
+    uploadState === 'success' ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-700/50'
+    : uploadState === 'error'  ? 'bg-red-900/40 text-red-400 border border-red-700/50'
+    : uploadState === 'uploading' ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
+    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white';
 
   return (
     <header className="bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
@@ -53,6 +114,24 @@ export default function Header({ title, subtitle, onToggleSidebar, sidebarCollap
             Clear filters ({activeFiltersCount})
           </button>
         )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={handleFile}
+        />
+        <button
+          onClick={() => uploadState === 'idle' && inputRef.current?.click()}
+          disabled={uploadState === 'uploading'}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${uploadColorClass}`}
+        >
+          {uploadIcon}
+          {uploadLabel}
+          {uploadState === 'success' && uploadResult?.skipped ? (
+            <span className="text-xs text-slate-500">{uploadResult.skipped} skipped</span>
+          ) : null}
+        </button>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
