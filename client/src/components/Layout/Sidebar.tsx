@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import CsvUploadButton from './CsvUploadButton';
 
 const navItems = [
   { path: '/', label: 'Sold Price Analysis', icon: '📈' },
@@ -59,6 +60,16 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
           </NavLink>
         ))}
       </nav>
+
+      {/* CSV Import */}
+      <div className="border-t border-slate-700 pt-3">
+        {!collapsed && (
+          <div className="px-6 mb-1">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</span>
+          </div>
+        )}
+        <CsvUploadButton collapsed={collapsed} />
+      </div>
 
       {/* User */}
       <div className="border-t border-slate-700 p-3">

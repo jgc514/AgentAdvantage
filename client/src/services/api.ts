@@ -76,6 +76,15 @@ export const apiService = {
     const res = await api.get('/properties/meta');
     return res.data;
   },
+
+  importCsv: async (file: File): Promise<{ imported: number; skipped: number; source: string; errors?: string[] }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post('/properties/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
 };
 
 export default apiService;
