@@ -22,7 +22,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
     <aside
       className={`flex flex-col bg-slate-900 border-r border-slate-700 transition-all duration-300 ${
         collapsed ? 'w-16' : 'w-64'
-      } min-h-screen`}
+      } h-full overflow-hidden`}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-700">
@@ -62,7 +62,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
       </nav>
 
       {/* CSV Import */}
-      <div className="border-t border-slate-700 pt-3">
+      <div className="border-t border-slate-700 pt-3 flex-shrink-0">
         {!collapsed && (
           <div className="px-6 mb-1">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</span>
@@ -72,7 +72,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
       </div>
 
       {/* User */}
-      <div className="border-t border-slate-700 p-3">
+      <div className="border-t border-slate-700 p-3 flex-shrink-0">
         <div className={`flex items-center gap-3 px-2 py-2 rounded-lg ${collapsed ? 'justify-center' : ''}`}>
           <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
             {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
