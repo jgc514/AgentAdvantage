@@ -37,6 +37,11 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
         )}
       </div>
 
+      {/* CSV Import — always visible below logo */}
+      <div className="border-b border-slate-700 py-2">
+        <CsvUploadButton collapsed={collapsed} />
+      </div>
+
       {/* Nav */}
       <nav className="flex-1 py-4 overflow-y-auto">
         <div className={`px-3 mb-2 ${collapsed ? 'hidden' : ''}`}>
@@ -59,16 +64,6 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
             {!collapsed && <span className="truncate">{item.label}</span>}
           </NavLink>
         ))}
-
-        {/* CSV Import */}
-        <div className={`mt-4 pt-3 border-t border-slate-700 ${collapsed ? '' : ''}`}>
-          {!collapsed && (
-            <div className="px-3 mb-1">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</span>
-            </div>
-          )}
-          <CsvUploadButton collapsed={collapsed} />
-        </div>
       </nav>
 
       {/* User */}
